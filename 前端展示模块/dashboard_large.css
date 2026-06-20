@@ -1,0 +1,2076 @@
+/* ====================================================================
+   秦岭森林火情智能监测指挥中心 - 大屏指挥大屏样式
+   第三阶段-A 视觉统一版：与 dashboard 深蓝黑科技风完全统一
+   设计原则：高级科技感 + 指挥中心气场 + 进入仪式感
+   适配：1920×1080 全屏大屏布局
+   ==================================================================== */
+
+/* ==================== CSS变量 - 与dashboard统一色彩体系 ==================== */
+:root {
+    /* 背景色 - 与 dashboard styles.css 完全统一 */
+    --large-bg-dark: #060a13;
+    --large-bg-panel: rgba(10, 18, 40, 0.88);
+    --large-bg-card: rgba(10, 18, 40, 0.85);
+
+    /* 科技色 - 青蓝科技光 */
+    --large-border-glow: #00d4ff;
+    --large-border-glow-light: rgba(0, 212, 255, 0.2);
+    --large-border-glow-dim: rgba(0, 212, 255, 0.12);
+
+    /* 文字色 - 与 dashboard 统一 */
+    --large-text-primary: #E8ECF1;
+    --large-text-secondary: #8899AA;
+    --large-text-muted: #556677;
+
+    /* 告警等级色 - 与 dashboard 完全统一 */
+    --large-critical: #FF3838;
+    --large-high: #FF9F1A;
+    --large-medium: #1E90FF;
+    --large-low: #2ED573;
+
+    /* 装饰色 */
+    --large-accent-cyan: #00d4ff;
+    --large-accent-blue: #1e90ff;
+    --large-scan-line: rgba(0, 212, 255, 0.03);
+
+    /* 阴影 - 与 dashboard 统一 */
+    --large-shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+    --large-shadow-glow: 0 0 20px rgba(0, 212, 255, 0.08);
+
+    /* 圆角 - 与 dashboard 统一 */
+    --large-panel-radius: 14px;
+    --large-card-radius: 10px;
+}
+
+/* ==================== 全局重置 ==================== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background-color: var(--large-bg-dark);
+    color: var(--large-text-primary);
+}
+
+/* ==================== 指挥中心启动动画遮罩 ==================== */
+.boot-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background:
+        radial-gradient(ellipse 50% 40% at 50% 45%, rgba(0, 60, 140, 0.15) 0%, transparent 70%),
+        var(--large-bg-dark);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.boot-overlay.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 科技网格背景 */
+.boot-overlay .boot-grid-bg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-image:
+        linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    opacity: 0.5;
+}
+
+/* 扫描线 */
+.boot-overlay .boot-scan-line {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 2px;
+    background: linear-gradient(90deg, transparent 10%, rgba(0, 212, 255, 0.4) 50%, transparent 90%);
+    animation: boot-scan-move 2s ease-in-out infinite;
+}
+
+@keyframes boot-scan-move {
+    0% { top: 0%; opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+}
+
+/* 六边形启动图标 */
+.boot-overlay .boot-icon {
+    width: 72px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 28px;
+}
+
+.boot-icon .boot-hex-ring {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border: 2px solid rgba(0, 212, 255, 0.3);
+    border-radius: 50%;
+    animation: boot-hex-spin 3s linear infinite;
+}
+
+.boot-icon .boot-hex-ring::after {
+    content: '';
+    position: absolute;
+    top: 6px; left: 6px;
+    right: 6px; bottom: 6px;
+    border: 1px solid rgba(0, 212, 255, 0.15);
+    border-radius: 50%;
+    animation: boot-hex-spin 3s linear infinite reverse;
+}
+
+@keyframes boot-hex-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.boot-icon .boot-icon-text {
+    font-size: 2rem;
+    filter: drop-shadow(0 0 12px rgba(255, 100, 50, 0.6));
+    z-index: 2;
+    animation: boot-icon-pulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes boot-icon-pulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(1.1); opacity: 1; }
+}
+
+.boot-overlay .boot-text {
+    font-size: 0.85rem;
+    color: var(--large-accent-cyan);
+    letter-spacing: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.boot-overlay .boot-sub-text {
+    font-size: 0.65rem;
+    color: rgba(0, 212, 255, 0.35);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+}
+
+.boot-overlay .boot-progress {
+    width: 240px;
+    height: 2px;
+    background: rgba(0, 212, 255, 0.12);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+}
+
+.boot-overlay .boot-progress-bar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--large-accent-cyan), #00ffcc);
+    border-radius: 2px;
+    transition: width 0.25s ease;
+    box-shadow: 0 0 12px rgba(0, 212, 255, 0.6);
+}
+
+/* 进度完成后的光标尾迹 */
+.boot-overlay .boot-progress-bar::after {
+    content: '';
+    position: absolute;
+    right: -2px;
+    top: -3px;
+    width: 8px;
+    height: 8px;
+    background: #00ffcc;
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(0, 255, 204, 0.8);
+}
+
+/* ==================== 大屏容器 - 进入仪式感 ==================== */
+.large-screen-container {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.large-screen-container.boot-active {
+    opacity: 1;
+}
+
+/* 各区域初始隐藏 */
+.large-screen-container .large-header,
+.large-screen-container .left-area,
+.large-screen-container .center-area,
+.large-screen-container .right-area,
+.large-screen-container .large-footer,
+.large-screen-container .large-bottom-bar {
+    opacity: 0;
+}
+
+/* 各区域激活入场动画 */
+.large-screen-container.boot-active .large-header {
+    animation: section-fade-in 0.4s ease-out forwards;
+}
+
+.large-screen-container.boot-active .left-area {
+    animation: section-slide-left 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.12s forwards;
+}
+
+.large-screen-container.boot-active .center-area {
+    animation: section-scale-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.18s forwards;
+}
+
+.large-screen-container.boot-active .right-area {
+    animation: section-slide-right 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.12s forwards;
+}
+
+.large-screen-container.boot-active .large-footer {
+    animation: section-slide-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.28s forwards;
+}
+
+.large-screen-container.boot-active .large-bottom-bar {
+    animation: section-fade-in 0.35s ease-out 0.38s forwards;
+}
+
+/* 状态点激活 - 最后点亮 */
+.large-screen-container.boot-active .header-status-dot.online {
+    opacity: 0;
+    animation: status-activate 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.45s forwards, dot-pulse-ring 2s ease-in-out 0.95s infinite;
+}
+
+/* 信息项逐步点亮 */
+.large-screen-container.boot-active .header-info-item:nth-child(1) {
+    opacity: 0;
+    animation: info-activate 0.35s ease-out 0.25s forwards;
+}
+
+.large-screen-container.boot-active .header-info-item:nth-child(2) {
+    opacity: 0;
+    animation: info-activate 0.35s ease-out 0.32s forwards;
+}
+
+.large-screen-container.boot-active .header-info-item:nth-child(3) {
+    opacity: 0;
+    animation: info-activate 0.35s ease-out 0.39s forwards;
+}
+
+/* 入场动画关键帧 */
+@keyframes section-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes section-slide-left {
+    from { opacity: 0; transform: translateX(-50px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes section-slide-right {
+    from { opacity: 0; transform: translateX(50px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes section-slide-up {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes section-scale-in {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes status-activate {
+    0% { opacity: 0; transform: scale(0); }
+    60% { opacity: 1; transform: scale(1.6); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes info-activate {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 背景网格装饰 */
+.large-screen-container::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-image:
+        linear-gradient(rgba(0, 212, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* 深层辐射渐变背景 - 与 dashboard 统一 */
+.large-screen-container::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background:
+        radial-gradient(ellipse 80% 60% at 50% 45%, rgba(0, 50, 120, 0.1) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 20% 50%, rgba(0, 100, 200, 0.05) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 30% at 80% 50%, rgba(0, 100, 200, 0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ==================== 顶部标题栏 ==================== */
+.large-header {
+    flex-shrink: 0;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    background: linear-gradient(180deg, rgba(10, 16, 32, 0.98) 0%, rgba(6, 10, 19, 0.95) 100%);
+    border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+    box-shadow:
+        0 2px 20px rgba(0, 0, 0, 0.5),
+        0 1px 0 rgba(0, 212, 255, 0.1);
+    position: relative;
+    z-index: 10;
+}
+
+/* 底部呼吸光效条 */
+.large-header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(0, 212, 255, 0.15) 10%,
+        var(--large-accent-cyan) 25%,
+        #00ffcc 40%,
+        var(--large-accent-cyan) 50%,
+        #00ffcc 60%,
+        var(--large-accent-cyan) 75%,
+        rgba(0, 212, 255, 0.15) 90%,
+        transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: header-breath-glow 4s ease-in-out infinite;
+}
+
+@keyframes header-breath-glow {
+    0% { opacity: 0.3; background-position: 0% 0%; }
+    50% { opacity: 0.8; background-position: 100% 0%; }
+    100% { opacity: 0.3; background-position: 0% 0%; }
+}
+
+/* 标题区域 */
+.header-title-area {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-logo {
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.5));
+    animation: icon-glow 3s ease-in-out infinite;
+}
+
+@keyframes icon-glow {
+    0%, 100% { filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.4)); }
+    50% { filter: drop-shadow(0 0 16px rgba(0, 212, 255, 0.8)); }
+}
+
+/* 系统主标题 - 高级渐变 + 扫光 */
+.header-title {
+    font-size: 1.75rem;
+    font-weight: 900;
+    letter-spacing: 8px;
+    background: linear-gradient(
+        90deg,
+        #E8ECF1 0%,
+        var(--large-accent-cyan) 25%,
+        #ffffff 50%,
+        var(--large-accent-cyan) 75%,
+        #E8ECF1 100%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: title-shimmer 5s ease-in-out infinite;
+    filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.3));
+    position: relative;
+    white-space: nowrap;
+}
+
+@keyframes title-shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* 标题下方光晕线 */
+.header-title::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.4), transparent);
+}
+
+/* 演示模式按钮 */
+.header-center-area {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.demo-mode-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    background: linear-gradient(135deg, rgba(255, 56, 56, 0.1) 0%, rgba(255, 159, 26, 0.1) 100%);
+    border: 1px solid rgba(255, 56, 56, 0.3);
+    border-radius: 20px;
+    color: #ff6b7a;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+    font-family: inherit;
+    position: relative;
+    overflow: hidden;
+}
+
+.demo-mode-btn:hover {
+    background: linear-gradient(135deg, rgba(255, 56, 56, 0.2) 0%, rgba(255, 159, 26, 0.2) 100%);
+    border-color: rgba(255, 56, 56, 0.5);
+    box-shadow: 0 0 20px rgba(255, 56, 56, 0.2);
+    transform: translateY(-1px);
+}
+
+.demo-mode-btn.active {
+    background: linear-gradient(135deg, rgba(255, 56, 56, 0.3) 0%, rgba(255, 159, 26, 0.3) 100%);
+    border-color: var(--large-critical);
+    color: #ffffff;
+    box-shadow: 0 0 25px rgba(255, 56, 56, 0.4);
+    animation: demo-btn-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes demo-btn-pulse {
+    0%, 100% { box-shadow: 0 0 12px rgba(255, 56, 56, 0.3); }
+    50% { box-shadow: 0 0 28px rgba(255, 56, 56, 0.55); }
+}
+
+.demo-mode-btn i { font-size: 0.9rem; }
+
+/* 顶部信息区域 */
+.header-info-area {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.header-info-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 16px;
+    background: rgba(0, 212, 255, 0.04);
+    border: 1px solid rgba(0, 212, 255, 0.12);
+    border-radius: 8px;
+    min-width: 100px;
+    transition: all 0.3s ease;
+}
+
+.header-info-item:hover {
+    background: rgba(0, 212, 255, 0.08);
+    border-color: rgba(0, 212, 255, 0.3);
+    box-shadow: 0 0 12px rgba(0, 212, 255, 0.06);
+}
+
+.header-info-label {
+    font-size: 0.62rem;
+    color: var(--large-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.header-info-value {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--large-accent-cyan);
+    font-family: 'Courier New', monospace;
+}
+
+.header-status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+    position: relative;
+}
+
+.header-status-dot.online {
+    background: var(--large-low);
+    box-shadow: 0 0 8px var(--large-low);
+}
+
+@keyframes dot-pulse-ring {
+    0%, 100% { box-shadow: 0 0 4px var(--large-low); }
+    50% { box-shadow: 0 0 12px var(--large-low), 0 0 22px rgba(46, 213, 115, 0.2); }
+}
+
+/* ==================== 主体内容区域 ==================== */
+.large-body {
+    flex: 1;
+    display: flex;
+    gap: 14px;
+    padding: 14px 18px;
+    position: relative;
+    z-index: 5;
+    min-height: 0;
+}
+
+/* ==================== 面板通用样式 - 高级科技感统一 ==================== */
+.large-panel {
+    background: var(--large-bg-panel);
+    border: 1px solid var(--large-border-glow-dim);
+    border-radius: var(--large-panel-radius);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    box-shadow: var(--large-shadow-card);
+}
+
+.large-panel:hover {
+    transform: translateY(-2px);
+    border-color: var(--large-border-glow-light);
+    box-shadow:
+        var(--large-shadow-card),
+        var(--large-shadow-glow);
+}
+
+/* 面板顶部发光装饰线 */
+.large-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    width: 80%;
+    height: 1px;
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(0, 212, 255, 0.4),
+        transparent
+    );
+    opacity: 0.6;
+}
+
+/* 面板四角装饰 - 更精致 */
+.large-panel::after {
+    content: '';
+    position: absolute;
+    top: -1px; left: -1px; right: -1px; bottom: -1px;
+    border-radius: var(--large-panel-radius);
+    pointer-events: none;
+    background:
+        linear-gradient(135deg, rgba(0, 212, 255, 0.5) 0%, transparent 4%) no-repeat top left,
+        linear-gradient(-135deg, rgba(0, 212, 255, 0.5) 0%, transparent 4%) no-repeat top right,
+        linear-gradient(45deg, rgba(0, 212, 255, 0.5) 0%, transparent 4%) no-repeat bottom left,
+        linear-gradient(-45deg, rgba(0, 212, 255, 0.5) 0%, transparent 4%) no-repeat bottom right;
+    background-size: 22px 22px;
+    opacity: 0.4;
+    z-index: 1;
+}
+
+/* 面板边框呼吸 */
+@keyframes border-flow-glow {
+    0%, 100% { border-color: rgba(0, 212, 255, 0.12); }
+    50% { border-color: rgba(0, 212, 255, 0.25); }
+}
+
+.large-panel {
+    animation: border-flow-glow 6s ease-in-out infinite;
+}
+
+/* 面板标题 - 统一风格 */
+.panel-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--large-accent-cyan);
+    border-bottom: 1px solid rgba(0, 212, 255, 0.08);
+    letter-spacing: 1.5px;
+    flex-shrink: 0;
+    text-shadow: 0 0 12px rgba(0, 212, 255, 0.2);
+}
+
+.panel-title-icon {
+    font-size: 1rem;
+    filter: drop-shadow(0 0 4px rgba(0, 212, 255, 0.3));
+}
+
+.panel-title-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(0, 212, 255, 0.25), transparent);
+    margin-left: 10px;
+}
+
+.panel-content {
+    flex: 1;
+    padding: 12px 16px;
+    overflow: hidden;
+    position: relative;
+    z-index: 2;
+}
+
+/* ==================== 左侧区域 ==================== */
+.left-area {
+    width: 280px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* ==================== 告警流 ==================== */
+.alert-stream-list {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+}
+
+.alert-scroll-wrapper {
+    position: absolute;
+    width: 100%;
+    top: 0;
+    left: 0;
+}
+
+.alert-stream-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    border-left: 3px solid var(--large-medium);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.alert-stream-item:hover {
+    background: rgba(0, 212, 255, 0.04);
+    transform: translateX(4px);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.04);
+}
+
+/* 新告警进入动画 */
+@keyframes alert-slide-in {
+    0% {
+        transform: translateX(-20px);
+        opacity: 0;
+        max-height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        margin-bottom: 0;
+    }
+    40% { opacity: 0.7; }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+        max-height: 200px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        margin-bottom: 8px;
+    }
+}
+
+.alert-stream-item.alert-new-item {
+    animation: alert-slide-in 0.5s ease-out forwards;
+}
+
+@keyframes alert-flash-highlight {
+    0% { box-shadow: 0 0 0px rgba(0, 212, 255, 0); }
+    25% { box-shadow: 0 0 12px rgba(0, 212, 255, 0.35), inset 0 0 8px rgba(0, 212, 255, 0.04); }
+    50% { box-shadow: 0 0 4px rgba(0, 212, 255, 0.12); }
+    100% { box-shadow: 0 0 0px rgba(0, 212, 255, 0); }
+}
+
+.alert-stream-item.alert-highlight {
+    animation: alert-slide-in 0.5s ease-out forwards, alert-flash-highlight 1.2s ease-in-out;
+}
+
+@keyframes time-tag-flash {
+    0% { color: var(--large-text-muted); }
+    30% { color: var(--large-accent-cyan); text-shadow: 0 0 8px rgba(0, 212, 255, 0.4); }
+    60%, 100% { color: var(--large-text-muted); }
+}
+
+.alert-stream-item.alert-new-item .alert-item-time {
+    animation: time-tag-flash 1s ease-in-out;
+}
+
+/* 告警等级样式 */
+.alert-stream-item.level-critical {
+    border-left-color: var(--large-critical);
+    background: rgba(255, 56, 56, 0.05);
+}
+
+.alert-stream-item.level-high {
+    border-left-color: var(--large-high);
+    background: rgba(255, 159, 26, 0.05);
+}
+
+.alert-stream-item.level-medium {
+    border-left-color: var(--large-medium);
+    background: rgba(30, 144, 255, 0.05);
+}
+
+.alert-stream-item.level-low {
+    border-left-color: var(--large-low);
+    background: rgba(46, 213, 115, 0.05);
+}
+
+.alert-stream-item.level-critical.alert-new-item {
+    box-shadow: 0 0 10px rgba(255, 56, 56, 0.15), inset 0 0 5px rgba(255, 56, 56, 0.02);
+}
+
+.alert-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.alert-level-tag {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.alert-level-tag.tag-critical {
+    background: rgba(255, 56, 56, 0.18);
+    color: var(--large-critical);
+    border: 1px solid rgba(255, 56, 56, 0.35);
+}
+
+.alert-level-tag.tag-high {
+    background: rgba(255, 159, 26, 0.18);
+    color: var(--large-high);
+    border: 1px solid rgba(255, 159, 26, 0.35);
+}
+
+.alert-level-tag.tag-medium {
+    background: rgba(30, 144, 255, 0.18);
+    color: var(--large-medium);
+    border: 1px solid rgba(30, 144, 255, 0.35);
+}
+
+.alert-level-tag.tag-low {
+    background: rgba(46, 213, 115, 0.18);
+    color: var(--large-low);
+    border: 1px solid rgba(46, 213, 115, 0.35);
+}
+
+.alert-item-time {
+    font-size: 0.68rem;
+    color: var(--large-text-muted);
+    font-family: 'Courier New', monospace;
+}
+
+.alert-item-location {
+    font-size: 0.76rem;
+    color: var(--large-text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.alert-item-score {
+    font-size: 0.73rem;
+    color: var(--large-text-muted);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.alert-item-score .score-value {
+    font-weight: 700;
+    color: var(--large-accent-cyan);
+    font-family: 'Courier New', monospace;
+}
+
+/* ==================== 中间区域 - 地图 ==================== */
+.center-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+}
+
+.map-panel {
+    flex: 1;
+    position: relative;
+    /* 指挥系统核心区域 - 多层科技边框 */
+    border: 1.5px solid rgba(0, 212, 255, 0.40) !important;
+    box-shadow:
+        /* 基础投影 */
+        var(--large-shadow-card),
+        /* 外层青蓝氛围光 */
+        0 0 30px rgba(0, 180, 255, 0.07),
+        0 0 60px rgba(0, 100, 220, 0.05),
+        0 0 100px rgba(0, 60, 160, 0.04),
+        /* 内层景深沉浸 */
+        inset 0 0 50px rgba(0, 80, 180, 0.04),
+        inset 0 0 100px rgba(0, 40, 120, 0.03),
+        /* 顶部边缘高光 */
+        inset 0 1px 0 rgba(0, 212, 255, 0.12) !important;
+    animation: map-panel-border-pulse 6s ease-in-out infinite !important;
+    /* 微弱背景渐变增强景深 */
+    background:
+        linear-gradient(180deg, rgba(0, 20, 50, 0.06) 0%, transparent 8%, transparent 92%, rgba(0, 20, 50, 0.06) 100%),
+        var(--large-bg-panel) !important;
+}
+
+/* 地图面板四角科技光角 - 额外CSS装饰层 */
+.map-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: var(--large-panel-radius);
+    pointer-events: none;
+    z-index: 10;
+    /* 四角渐变光点 - 指挥系统标志 */
+    background:
+        /* 左上角 */
+        radial-gradient(ellipse 30px 30px at 0% 0%, rgba(0, 212, 255, 0.15) 0%, transparent 70%),
+        /* 右上角 */
+        radial-gradient(ellipse 30px 30px at 100% 0%, rgba(0, 212, 255, 0.15) 0%, transparent 70%),
+        /* 左下角 */
+        radial-gradient(ellipse 30px 30px at 0% 100%, rgba(0, 212, 255, 0.12) 0%, transparent 70%),
+        /* 右下角 */
+        radial-gradient(ellipse 30px 30px at 100% 100%, rgba(0, 212, 255, 0.12) 0%, transparent 70%),
+        /* 顶部中线高光 */
+        linear-gradient(90deg, transparent 15%, rgba(0, 212, 255, 0.18) 48%, rgba(0, 212, 255, 0.25) 50%, rgba(0, 212, 255, 0.18) 52%, transparent 85%);
+    opacity: 0.8;
+}
+
+/* 地图面板底部微光 */
+.map-panel::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 10%, rgba(0, 212, 255, 0.15) 30%, rgba(0, 212, 255, 0.08) 70%, transparent 90%);
+    pointer-events: none;
+    z-index: 10;
+    border-radius: 0 0 var(--large-panel-radius) var(--large-panel-radius);
+}
+
+@keyframes map-panel-border-pulse {
+    0%, 100% {
+        border-color: rgba(0, 212, 255, 0.35);
+        box-shadow:
+            var(--large-shadow-card),
+            0 0 30px rgba(0, 180, 255, 0.05),
+            0 0 60px rgba(0, 100, 220, 0.04),
+            0 0 100px rgba(0, 60, 160, 0.03),
+            inset 0 0 50px rgba(0, 80, 180, 0.03),
+            inset 0 0 100px rgba(0, 40, 120, 0.02),
+            inset 0 1px 0 rgba(0, 212, 255, 0.10);
+    }
+    50% {
+        border-color: rgba(0, 212, 255, 0.52);
+        box-shadow:
+            var(--large-shadow-card),
+            0 0 35px rgba(0, 180, 255, 0.08),
+            0 0 70px rgba(0, 100, 220, 0.06),
+            0 0 110px rgba(0, 60, 160, 0.05),
+            inset 0 0 55px rgba(0, 80, 180, 0.05),
+            inset 0 0 110px rgba(0, 40, 120, 0.03),
+            inset 0 1px 0 rgba(0, 212, 255, 0.15);
+    }
+}
+
+#map-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    border-radius: 0 0 var(--large-panel-radius) var(--large-panel-radius);
+    overflow: hidden;
+    box-shadow: inset 0 0 30px rgba(0, 212, 255, 0.03);
+    /* 地图聚焦感 - 中心视觉强化 */
+    isolation: isolate;
+}
+
+/* 地图聚焦感 - 边缘暗化 vignette 效果（强化版） */
+#map-container::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: radial-gradient(
+        ellipse 68% 62% at 50% 50%,
+        transparent 45%,
+        rgba(3, 6, 16, 0.18) 65%,
+        rgba(3, 6, 16, 0.32) 80%,
+        rgba(3, 6, 16, 0.50) 100%
+    );
+    pointer-events: none;
+    z-index: 8;
+}
+
+/* 地图聚焦感 - 内发光景深层（多层增强） */
+#map-container::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    box-shadow:
+        /* 中心内发光 - 增强聚焦感 */
+        inset 0 0 60px rgba(0, 100, 200, 0.04),
+        inset 0 0 120px rgba(0, 70, 160, 0.03),
+        /* 边缘压暗层次 */
+        inset 2px 2px 30px rgba(0, 0, 0, 0.15),
+        inset -2px -2px 30px rgba(0, 0, 0, 0.15),
+        /* 顶部微妙高光 - 模拟环境光 */
+        inset 0 20px 40px rgba(0, 140, 220, 0.02);
+    border-radius: 0 0 var(--large-panel-radius) var(--large-panel-radius);
+    pointer-events: none;
+    z-index: 9;
+}
+
+#leaflet-map {
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+}
+
+/* Leaflet深色主题覆盖 */
+#leaflet-map .leaflet-control-zoom a {
+    background: rgba(10, 18, 40, 0.92) !important;
+    color: var(--large-accent-cyan) !important;
+    border-color: rgba(0, 212, 255, 0.2) !important;
+}
+
+#leaflet-map .leaflet-control-zoom a:hover {
+    background: rgba(0, 212, 255, 0.12) !important;
+}
+
+#leaflet-map .leaflet-control-attribution {
+    background: rgba(10, 18, 40, 0.85) !important;
+    color: var(--large-text-muted) !important;
+    font-size: 9px !important;
+}
+
+#leaflet-map .leaflet-control-attribution a {
+    color: var(--large-accent-cyan) !important;
+}
+
+.leaflet-popup-content-wrapper {
+    background: rgba(10, 18, 40, 0.96) !important;
+    color: var(--large-text-primary) !important;
+    border: 1px solid rgba(0, 212, 255, 0.3) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5), var(--large-shadow-glow) !important;
+}
+
+.leaflet-popup-tip {
+    background: rgba(10, 18, 40, 0.96) !important;
+}
+
+.leaflet-popup-content {
+    margin: 10px 14px !important;
+    font-size: 12px !important;
+    line-height: 1.6 !important;
+}
+
+.leaflet-popup-close-button {
+    color: var(--large-accent-cyan) !important;
+}
+
+.popup-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--large-accent-cyan);
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+}
+
+.popup-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(0, 212, 255, 0.06);
+}
+
+.popup-info-row:last-child { border-bottom: none; }
+
+.popup-label {
+    color: var(--large-text-muted);
+    font-size: 11px;
+}
+
+.popup-value {
+    color: var(--large-text-primary);
+    font-weight: 600;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+}
+
+.popup-value.level-critical { color: var(--large-critical); }
+.popup-value.level-high { color: var(--large-high); }
+.popup-value.level-medium { color: #FFD700; }
+.popup-value.level-low { color: var(--large-accent-cyan); }
+
+/* ==================== 火情标记 ==================== */
+.fire-marker {
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.45);
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.35);
+    transition: transform 0.2s ease;
+    position: relative;
+}
+
+.fire-marker:hover {
+    transform: scale(1.3);
+}
+
+@keyframes marker-blink-critical {
+    0%, 100% {
+        box-shadow: 0 0 6px rgba(255, 56, 56, 0.45), 0 0 18px rgba(255, 56, 56, 0.18);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 14px rgba(255, 56, 56, 0.75), 0 0 32px rgba(255, 56, 56, 0.3);
+        transform: scale(1.15);
+    }
+}
+
+@keyframes marker-blink-high {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(255, 159, 26, 0.45), 0 0 14px rgba(255, 159, 26, 0.12);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 11px rgba(255, 159, 26, 0.65), 0 0 26px rgba(255, 159, 26, 0.22);
+        transform: scale(1.1);
+    }
+}
+
+.fire-marker.blink-critical {
+    animation: marker-blink-critical 1.5s ease-in-out infinite;
+}
+
+.fire-marker.blink-high {
+    animation: marker-blink-high 1.8s ease-in-out infinite;
+}
+
+.fire-marker-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fire-ripple-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid;
+    pointer-events: none;
+    animation: ripple-expand 2.5s ease-out infinite;
+}
+
+.fire-ripple-ring.ripple-critical {
+    border-color: rgba(255, 56, 56, 0.35);
+}
+
+.fire-ripple-ring.ripple-high {
+    border-color: rgba(255, 159, 26, 0.25);
+}
+
+@keyframes ripple-expand {
+    0% { width: 14px; height: 14px; opacity: 0.5; }
+    100% { width: 50px; height: 50px; opacity: 0; }
+}
+
+.fire-ripple-ring.ripple-delay {
+    animation-delay: 1.2s;
+}
+
+/* ==================== 第三阶段-C2：真实告警→地图联动样式 ==================== */
+
+/* 真实告警Marker - 紧急级呼吸光（柔和高级） */
+.real-alert-marker.real-alert-glow-critical {
+    animation: marker-blink-critical 1.5s ease-in-out infinite, real-glow-critical 2.5s ease-in-out infinite;
+}
+
+@keyframes real-glow-critical {
+    0%, 100% {
+        box-shadow: 0 0 6px rgba(255, 56, 56, 0.5), 0 0 18px rgba(255, 56, 56, 0.2), 0 0 36px rgba(255, 56, 56, 0.08);
+    }
+    50% {
+        box-shadow: 0 0 10px rgba(255, 56, 56, 0.7), 0 0 28px rgba(255, 56, 56, 0.35), 0 0 50px rgba(255, 56, 56, 0.12);
+    }
+}
+
+/* 真实告警Marker - 高危级呼吸光 */
+.real-alert-marker.real-alert-glow-high {
+    animation: marker-blink-high 1.8s ease-in-out infinite, real-glow-high 3s ease-in-out infinite;
+}
+
+@keyframes real-glow-high {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(255, 159, 26, 0.5), 0 0 14px rgba(255, 159, 26, 0.15), 0 0 28px rgba(255, 159, 26, 0.06);
+    }
+    50% {
+        box-shadow: 0 0 8px rgba(255, 159, 26, 0.65), 0 0 22px rgba(255, 159, 26, 0.28), 0 0 40px rgba(255, 159, 26, 0.1);
+    }
+}
+
+/* 真实告警风险圈 - 脉冲呼吸动画 */
+.risk-circle-anim {
+    animation: risk-circle-pulse 3s ease-in-out infinite;
+}
+
+@keyframes risk-circle-pulse {
+    0%, 100% {
+        fill-opacity: 0.10;
+        stroke-opacity: 0.5;
+    }
+    50% {
+        fill-opacity: 0.22;
+        stroke-opacity: 0.8;
+    }
+}
+
+/* 真实告警扩散波纹圈 - 由JS控制半径动画，此样式辅助 */
+.ripple-circle {
+    pointer-events: none;
+}
+
+/* 真实告警Marker弹出窗口强调样式 */
+.leaflet-popup-content .popup-title {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+/* ==================== 雷达扫描层 ==================== */
+.map-radar-overlay {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 220px; height: 220px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    z-index: 5;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.map-radar-overlay::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 212, 255, 0.1);
+    box-shadow:
+        inset 0 0 50px rgba(0, 212, 255, 0.03),
+        0 0 50px rgba(0, 212, 255, 0.03);
+}
+
+.map-radar-overlay::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 50%; height: 50%;
+    transform-origin: 0 0;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        rgba(0, 212, 255, 0.1) 50deg,
+        transparent 50deg
+    );
+    animation: radar-sweep 4s linear infinite;
+}
+
+@keyframes radar-sweep {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.map-grid-bg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-image:
+        linear-gradient(rgba(0, 212, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 212, 255, 0.025) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 3;
+    opacity: 0.6;
+}
+
+.map-corner-decor {
+    position: absolute;
+    width: 32px; height: 32px;
+    z-index: 6;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.map-corner-decor.top-left {
+    top: 10px; left: 10px;
+    border-top: 2px solid var(--large-accent-cyan);
+    border-left: 2px solid var(--large-accent-cyan);
+    box-shadow: -2px -2px 8px rgba(0, 212, 255, 0.12);
+}
+
+.map-corner-decor.top-right {
+    top: 10px; right: 10px;
+    border-top: 2px solid var(--large-accent-cyan);
+    border-right: 2px solid var(--large-accent-cyan);
+    box-shadow: 2px -2px 8px rgba(0, 212, 255, 0.12);
+}
+
+.map-corner-decor.bottom-left {
+    bottom: 10px; left: 10px;
+    border-bottom: 2px solid var(--large-accent-cyan);
+    border-left: 2px solid var(--large-accent-cyan);
+    box-shadow: -2px 2px 8px rgba(0, 212, 255, 0.12);
+}
+
+.map-corner-decor.bottom-right {
+    bottom: 10px; right: 10px;
+    border-bottom: 2px solid var(--large-accent-cyan);
+    border-right: 2px solid var(--large-accent-cyan);
+    box-shadow: 2px 2px 8px rgba(0, 212, 255, 0.12);
+}
+
+.map-scan-line-h {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.12), transparent);
+    z-index: 4;
+    pointer-events: none;
+    animation: scan-line-h-move 8s linear infinite;
+}
+
+@keyframes scan-line-h-move {
+    0% { top: 0%; }
+    100% { top: 100%; }
+}
+
+/* ==================== 右侧区域 - 统计卡片 ==================== */
+.right-area {
+    width: 280px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.stats-card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.stat-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 8px;
+    background: rgba(0, 15, 40, 0.5);
+    border: 1px solid rgba(0, 212, 255, 0.1);
+    border-radius: var(--large-card-radius);
+    transition: all 0.35s ease;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 卡片流光边框 */
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        rgba(0, 212, 255, 0.06) 25deg,
+        transparent 50deg
+    );
+    animation: card-border-flow 8s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes card-border-flow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.stat-card:hover {
+    background: rgba(0, 212, 255, 0.05);
+    border-color: var(--large-border-glow-light);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 212, 255, 0.12);
+}
+
+.stat-card-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+    background: rgba(0, 212, 255, 0.06);
+    border: 1px solid rgba(0, 212, 255, 0.15);
+    color: var(--large-accent-cyan);
+    position: relative;
+    z-index: 2;
+}
+
+.stat-card-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-width: 0;
+    position: relative;
+    z-index: 2;
+    text-align: center;
+}
+
+.stat-card-label {
+    font-size: 0.6rem;
+    color: var(--large-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.stat-card-value {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--large-text-primary);
+    font-family: 'Courier New', monospace;
+    transition: all 0.3s ease;
+    text-shadow: 0 0 10px rgba(232, 236, 241, 0.08);
+    line-height: 1.2;
+}
+
+@keyframes number-roll-in {
+    0% { transform: translateY(8px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+.stat-value-animated {
+    animation: number-roll-in 0.4s ease-out;
+}
+
+/* 红色主题卡片 */
+.stat-card.card-red .stat-card-icon {
+    background: rgba(255, 56, 56, 0.1);
+    border-color: rgba(255, 56, 56, 0.2);
+    color: var(--large-critical);
+}
+
+.stat-card.card-red .stat-card-value {
+    color: var(--large-critical);
+    text-shadow: 0 0 10px rgba(255, 56, 56, 0.15);
+}
+
+.stat-card.card-red.card-risk-pulse {
+    border-color: rgba(255, 56, 56, 0.45);
+    box-shadow: 0 0 15px rgba(255, 56, 56, 0.1), inset 0 0 8px rgba(255, 56, 56, 0.02);
+    animation: risk-card-pulse 1.5s ease-in-out;
+}
+
+@keyframes risk-card-pulse {
+    0% { border-color: rgba(255, 56, 56, 0.15); }
+    30% { border-color: rgba(255, 56, 56, 0.55); box-shadow: 0 0 20px rgba(255, 56, 56, 0.18); }
+    100% { border-color: rgba(255, 56, 56, 0.15); }
+}
+
+@keyframes number-bounce {
+    0%, 100% { transform: scale(1); }
+    30% { transform: scale(1.12); }
+    60% { transform: scale(0.97); }
+}
+
+.stat-card.card-red .stat-card-value.value-bounce {
+    animation: number-bounce 0.5s ease-out;
+}
+
+.stat-card.card-green .stat-card-icon {
+    background: rgba(46, 213, 115, 0.1);
+    border-color: rgba(46, 213, 115, 0.2);
+    color: var(--large-low);
+}
+
+.stat-card.card-green .stat-card-value {
+    color: var(--large-low);
+}
+
+.stat-card.card-orange .stat-card-icon {
+    background: rgba(255, 159, 26, 0.1);
+    border-color: rgba(255, 159, 26, 0.2);
+    color: var(--large-high);
+}
+
+.stat-card.card-orange .stat-card-value {
+    color: var(--large-high);
+}
+
+/* 黄色主题卡片（中等风险等级） */
+.stat-card.card-yellow .stat-card-icon {
+    background: rgba(255, 215, 0, 0.1);
+    border-color: rgba(255, 215, 0, 0.2);
+    color: #FFD700;
+}
+
+.stat-card.card-yellow .stat-card-value {
+    color: #FFD700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.15);
+}
+
+/* ==================== 底部区域 - 趋势图 ==================== */
+.large-footer {
+    flex-shrink: 0;
+    height: 220px;
+    padding: 0 18px 14px;
+    position: relative;
+    z-index: 5;
+}
+
+.footer-panel {
+    height: 100%;
+    background: var(--large-bg-panel);
+    border: 1px solid var(--large-border-glow-dim);
+    border-radius: var(--large-panel-radius);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    box-shadow: var(--large-shadow-card);
+}
+
+.footer-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    width: 80%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.4), transparent);
+    opacity: 0.6;
+}
+
+.chart-area {
+    flex: 1;
+    padding: 10px 20px;
+    position: relative;
+}
+
+/* ==================== 底部信息栏 ==================== */
+.large-bottom-bar {
+    flex-shrink: 0;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    background: rgba(6, 10, 19, 0.9);
+    border-top: 1px solid rgba(0, 212, 255, 0.08);
+    font-size: 0.68rem;
+    color: var(--large-text-muted);
+    letter-spacing: 1px;
+    z-index: 10;
+}
+
+.bottom-bar-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ==================== 系统运行信息 ==================== */
+.system-info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.system-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+    font-size: 0.76rem;
+    transition: background 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.system-info-row:hover {
+    background: rgba(0, 212, 255, 0.04);
+    border-color: rgba(0, 212, 255, 0.06);
+}
+
+.system-info-row .info-label {
+    color: var(--large-text-muted);
+}
+
+.system-info-row .info-value {
+    color: var(--large-text-primary);
+    font-weight: 600;
+    font-family: 'Courier New', monospace;
+}
+
+.system-info-row .info-value.status-good { color: var(--large-low); }
+.system-info-row .info-value.status-warn { color: var(--large-high); }
+.system-info-row .info-value.status-bad { color: var(--large-critical); }
+
+/* ==================== 监控点状态 ==================== */
+.camera-preview-area {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.camera-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+    border: 1px solid rgba(0, 212, 255, 0.06);
+    transition: all 0.3s ease;
+}
+
+.camera-item:hover {
+    background: rgba(0, 212, 255, 0.04);
+    border-color: rgba(0, 212, 255, 0.12);
+}
+
+.camera-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--large-low);
+    box-shadow: 0 0 6px var(--large-low);
+    flex-shrink: 0;
+    animation: dot-pulse-ring 2s infinite;
+}
+
+.camera-dot.offline {
+    background: var(--large-critical);
+    box-shadow: 0 0 6px var(--large-critical);
+    animation: none;
+}
+
+.camera-name {
+    font-size: 0.72rem;
+    color: var(--large-text-secondary);
+    flex: 1;
+}
+
+.camera-status {
+    font-size: 0.63rem;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: 600;
+}
+
+.camera-status.online {
+    background: rgba(46, 213, 115, 0.1);
+    color: var(--large-low);
+}
+
+.camera-status.offline {
+    background: rgba(255, 56, 56, 0.1);
+    color: var(--large-critical);
+}
+
+/* ==================== 第三阶段-C3：演示模式真实化增强 ==================== */
+
+/* ---- 1. 演示模式状态指示灯（红色呼吸灯 + ACTIVE标签） ---- */
+.demo-active-indicator {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 14px;
+    background: rgba(255, 56, 56, 0.06);
+    border: 1px solid rgba(255, 56, 56, 0.25);
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 指示灯背景微光扫描 */
+.demo-active-indicator::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 56, 56, 0.08), transparent);
+    animation: indicator-scan 3s ease-in-out infinite;
+}
+
+@keyframes indicator-scan {
+    0% { left: -100%; }
+    50% { left: 100%; }
+    100% { left: 100%; }
+}
+
+.demo-active-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--large-critical);
+    box-shadow: 0 0 6px rgba(255, 56, 56, 0.5);
+    animation: demo-dot-breathe 2s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+@keyframes demo-dot-breathe {
+    0%, 100% {
+        opacity: 0.4;
+        box-shadow: 0 0 4px rgba(255, 56, 56, 0.3);
+        transform: scale(0.9);
+    }
+    50% {
+        opacity: 1;
+        box-shadow: 0 0 12px rgba(255, 56, 56, 0.8), 0 0 24px rgba(255, 56, 56, 0.3);
+        transform: scale(1.1);
+    }
+}
+
+.demo-active-text {
+    font-size: 0.7rem;
+    color: var(--large-critical);
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-shadow: 0 0 8px rgba(255, 56, 56, 0.2);
+    white-space: nowrap;
+    position: relative;
+    z-index: 2;
+}
+
+/* 演示模式激活时显示指示灯 */
+.large-screen-container.demo-active .demo-active-indicator {
+    display: flex;
+    animation: indicator-enter 0.4s ease-out forwards;
+}
+
+@keyframes indicator-enter {
+    from { opacity: 0; transform: scale(0.85); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* ---- 2. 顶部应急状态增强 ---- */
+.large-screen-container.demo-active .large-header {
+    border-bottom-color: rgba(255, 56, 56, 0.3);
+    box-shadow:
+        0 2px 25px rgba(255, 56, 56, 0.15),
+        0 1px 0 rgba(255, 56, 56, 0.08);
+    background: linear-gradient(180deg, rgba(18, 12, 20, 0.98) 0%, rgba(12, 8, 16, 0.95) 100%);
+}
+
+.large-screen-container.demo-active .large-header::after {
+    background: linear-gradient(90deg,
+        transparent 0%,
+        var(--large-critical) 12%,
+        #FF9F1A 28%,
+        var(--large-critical) 45%,
+        #FF9F1A 58%,
+        var(--large-critical) 72%,
+        #FF9F1A 88%,
+        transparent 100%
+    );
+    animation: header-breath-glow-emergency 1.8s ease-in-out infinite;
+    opacity: 0.7;
+}
+
+@keyframes header-breath-glow-emergency {
+    0%, 100% { opacity: 0.35; background-position: 0% 0%; }
+    50% { opacity: 0.85; background-position: 100% 0%; }
+}
+
+/* ---- 3. 大屏整体应急色调（克制的暖色偏移） ---- */
+/* 替换原有的深层辐射渐变，加入微弱暖色调 */
+.large-screen-container.demo-active::after {
+    background:
+        radial-gradient(ellipse 80% 60% at 50% 45%, rgba(255, 50, 20, 0.025) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 20% 50%, rgba(255, 80, 40, 0.015) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 30% at 80% 50%, rgba(255, 80, 40, 0.015) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 50% 50%, rgba(180, 40, 20, 0.012) 0%, transparent 65%);
+    transition: background 1.5s ease;
+}
+
+/* ---- 4. 面板应急状态视觉 ---- */
+.large-screen-container.demo-active .large-panel {
+    border-color: rgba(255, 56, 56, 0.18);
+    animation: border-flow-glow-emergency 3s ease-in-out infinite;
+}
+
+@keyframes border-flow-glow-emergency {
+    0%, 100% { border-color: rgba(255, 56, 56, 0.12); }
+    50% { border-color: rgba(255, 56, 56, 0.28); }
+}
+
+/* 面板顶部装饰线变暖色 */
+.large-screen-container.demo-active .large-panel::before {
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 80, 40, 0.3),
+        transparent
+    );
+}
+
+/* 面板标题应急强调 */
+.large-screen-container.demo-active .panel-title {
+    color: var(--large-critical);
+    text-shadow: 0 0 10px rgba(255, 56, 56, 0.12);
+    border-bottom-color: rgba(255, 56, 56, 0.1);
+}
+
+/* ---- 5. 告警流高频监测状态视觉强化 ---- */
+.large-screen-container.demo-active .alert-stream-item {
+    border-left-width: 4px;
+    transition: all 0.25s ease;
+}
+
+.large-screen-container.demo-active .alert-stream-item.level-critical {
+    background: rgba(255, 56, 56, 0.08);
+    border-left-color: var(--large-critical);
+    box-shadow: 0 0 8px rgba(255, 56, 56, 0.06);
+}
+
+.large-screen-container.demo-active .alert-stream-item.level-high {
+    background: rgba(255, 159, 26, 0.06);
+    border-left-color: var(--large-high);
+}
+
+/* 时间标签更醒目 */
+.large-screen-container.demo-active .alert-item-time {
+    color: rgba(255, 107, 122, 0.7);
+    font-weight: 600;
+    font-size: 0.72rem;
+}
+
+/* 新告警高亮增强 */
+.large-screen-container.demo-active .alert-stream-item.alert-new-item {
+    animation: alert-slide-in 0.4s ease-out forwards, alert-flash-emergency 1.5s ease-in-out;
+}
+
+@keyframes alert-flash-emergency {
+    0% { box-shadow: 0 0 0px rgba(255, 56, 56, 0); }
+    20% { box-shadow: 0 0 16px rgba(255, 56, 56, 0.3), inset 0 0 10px rgba(255, 56, 56, 0.03); }
+    50% { box-shadow: 0 0 6px rgba(255, 56, 56, 0.12); }
+    100% { box-shadow: 0 0 0px rgba(255, 56, 56, 0); }
+}
+
+/* 新告警时间标签闪烁增强 */
+.large-screen-container.demo-active .alert-stream-item.alert-new-item .alert-item-time {
+    animation: time-tag-flash-emergency 1.2s ease-in-out;
+}
+
+@keyframes time-tag-flash-emergency {
+    0% { color: rgba(255, 107, 122, 0.7); }
+    30% { color: var(--large-critical); text-shadow: 0 0 10px rgba(255, 56, 56, 0.5); }
+    60%, 100% { color: rgba(255, 107, 122, 0.7); text-shadow: none; }
+}
+
+/* 风险分数强调 */
+.large-screen-container.demo-active .alert-item-score .score-value {
+    color: var(--large-critical);
+    text-shadow: 0 0 6px rgba(255, 56, 56, 0.2);
+}
+
+/* ---- 6. 地图重点监测状态增强 ---- */
+/* 雷达扫描增强（更快 + 更明显） */
+.large-screen-container.demo-active .map-radar-overlay::after {
+    background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        rgba(255, 56, 56, 0.14) 55deg,
+        transparent 55deg
+    );
+    animation: radar-sweep 2.5s linear infinite;
+}
+
+/* 雷达圈增强 */
+.large-screen-container.demo-active .map-radar-overlay::before {
+    border-color: rgba(255, 56, 56, 0.12);
+    box-shadow:
+        inset 0 0 50px rgba(255, 56, 56, 0.04),
+        0 0 50px rgba(255, 56, 56, 0.03);
+}
+
+/* 地图聚焦感增强（轻微暖色暗化） */
+.large-screen-container.demo-active #map-container::before {
+    background: radial-gradient(
+        ellipse 68% 62% at 50% 50%,
+        transparent 42%,
+        rgba(50, 12, 5, 0.12) 62%,
+        rgba(35, 8, 4, 0.22) 78%,
+        rgba(15, 4, 2, 0.38) 100%
+    );
+}
+
+/* 地图内发光偏暖 */
+.large-screen-container.demo-active #map-container::after {
+    box-shadow:
+        inset 0 0 60px rgba(255, 80, 40, 0.025),
+        inset 0 0 120px rgba(255, 50, 20, 0.015),
+        inset 2px 2px 30px rgba(0, 0, 0, 0.18),
+        inset -2px -2px 30px rgba(0, 0, 0, 0.18),
+        inset 0 20px 40px rgba(255, 100, 60, 0.012);
+}
+
+/* 四角科技光偏红橙 */
+.large-screen-container.demo-active .map-corner-decor {
+    border-color: rgba(255, 80, 50, 0.5);
+    box-shadow: 0 0 8px rgba(255, 80, 50, 0.15);
+}
+
+/* 地图面板边框偏暖色脉冲 */
+.large-screen-container.demo-active .map-panel {
+    border-color: rgba(255, 56, 56, 0.35) !important;
+    animation: map-panel-border-pulse-emergency 4s ease-in-out infinite !important;
+}
+
+@keyframes map-panel-border-pulse-emergency {
+    0%, 100% {
+        border-color: rgba(255, 56, 56, 0.28);
+        box-shadow:
+            var(--large-shadow-card),
+            0 0 30px rgba(255, 50, 30, 0.06),
+            0 0 60px rgba(255, 80, 40, 0.04),
+            inset 0 0 50px rgba(255, 60, 30, 0.03),
+            inset 0 1px 0 rgba(255, 80, 50, 0.10);
+    }
+    50% {
+        border-color: rgba(255, 56, 56, 0.48);
+        box-shadow:
+            var(--large-shadow-card),
+            0 0 35px rgba(255, 50, 30, 0.09),
+            0 0 70px rgba(255, 80, 40, 0.06),
+            inset 0 0 55px rgba(255, 60, 30, 0.05),
+            inset 0 1px 0 rgba(255, 80, 50, 0.15);
+    }
+}
+
+/* 地图面板四角光偏暖 */
+.large-screen-container.demo-active .map-panel::before {
+    background:
+        radial-gradient(ellipse 30px 30px at 0% 0%, rgba(255, 80, 50, 0.18) 0%, transparent 70%) no-repeat top left,
+        radial-gradient(ellipse 30px 30px at 100% 0%, rgba(255, 80, 50, 0.18) 0%, transparent 70%) no-repeat top right,
+        radial-gradient(ellipse 30px 30px at 0% 100%, rgba(255, 80, 50, 0.14) 0%, transparent 70%) no-repeat bottom left,
+        radial-gradient(ellipse 30px 30px at 100% 100%, rgba(255, 80, 50, 0.14) 0%, transparent 70%) no-repeat bottom right,
+        linear-gradient(90deg, transparent 15%, rgba(255, 80, 50, 0.15) 48%, rgba(255, 80, 50, 0.22) 50%, rgba(255, 80, 50, 0.15) 52%, transparent 85%);
+}
+
+/* ---- 7. 统计卡片应急强调 ---- */
+.large-screen-container.demo-active .stat-card.card-red {
+    border-color: rgba(255, 56, 56, 0.35);
+    box-shadow: 0 0 12px rgba(255, 56, 56, 0.08);
+}
+
+.large-screen-container.demo-active .stat-card.card-red .stat-card-value {
+    text-shadow: 0 0 12px rgba(255, 56, 56, 0.2);
+}
+
+/* ---- 8. 底部趋势图应急色调 ---- */
+.large-screen-container.demo-active .footer-panel {
+    border-color: rgba(255, 56, 56, 0.15);
+}
+
+/* ---- 9. 底部信息栏应急状态 ---- */
+.large-screen-container.demo-active .large-bottom-bar {
+    border-top-color: rgba(255, 56, 56, 0.12);
+    background: rgba(12, 6, 10, 0.92);
+}
+
+/* ---- 10. 科技网格背景偏暖（极微弱） ---- */
+.large-screen-container.demo-active::before {
+    background-image:
+        linear-gradient(rgba(255, 80, 40, 0.012) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 80, 40, 0.012) 1px, transparent 1px);
+}
+
+/* ---- 11. 地图扫描线偏暖色 ---- */
+.large-screen-container.demo-active .map-scan-line-h {
+    background: linear-gradient(90deg, transparent, rgba(255, 60, 40, 0.1), transparent);
+    animation: scan-line-h-move 5s linear infinite;
+}
+
+/* ---- 12. 监控点应急强调 ---- */
+.large-screen-container.demo-active .camera-dot {
+    animation: camera-dot-emergency 1.5s ease-in-out infinite;
+}
+
+@keyframes camera-dot-emergency {
+    0%, 100% { box-shadow: 0 0 4px var(--large-low); }
+    50% { box-shadow: 0 0 10px var(--large-low), 0 0 18px rgba(46, 213, 115, 0.3); }
+}
+
+/* ==================== 第三阶段-C4：新告警聚焦优化 ==================== */
+
+/* ---- 1. 地图容器聚焦效果（新告警出现时边框亮一下，1.5s恢复） ---- */
+.map-panel.map-panel-focus {
+    border-color: rgba(0, 212, 255, 0.85) !important;
+    box-shadow:
+        var(--large-shadow-card),
+        0 0 40px rgba(0, 180, 255, 0.2),
+        0 0 80px rgba(0, 100, 220, 0.12),
+        0 0 120px rgba(0, 60, 160, 0.08),
+        inset 0 0 60px rgba(0, 120, 220, 0.1),
+        inset 0 1px 0 rgba(0, 212, 255, 0.3) !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+/* 高风险聚焦（红橙光） */
+.map-panel.map-panel-focus-critical {
+    border-color: rgba(255, 56, 56, 0.75) !important;
+    box-shadow:
+        var(--large-shadow-card),
+        0 0 40px rgba(255, 56, 56, 0.18),
+        0 0 80px rgba(255, 100, 40, 0.1),
+        0 0 120px rgba(255, 60, 30, 0.06),
+        inset 0 0 60px rgba(255, 80, 40, 0.06),
+        inset 0 1px 0 rgba(255, 80, 50, 0.2) !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+/* ---- 2. 风险点强调效果（marker轻微scale放大，2s恢复） ---- */
+.marker-focus-bounce {
+    animation: marker-focus-bounce-anim 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+}
+
+@keyframes marker-focus-bounce-anim {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.8); }
+    70% { transform: scale(1.3); }
+    100% { transform: scale(1.4); }
+}
+
+.marker-focus-recover {
+    animation: marker-focus-recover-anim 0.5s ease-out forwards !important;
+}
+
+@keyframes marker-focus-recover-anim {
+    0% { transform: scale(1.4); }
+    100% { transform: scale(1); }
+}
+
+/* ---- 3. 风险圈亮度增强效果（短暂增强，2s恢复） ---- */
+.risk-circle-focus {
+    fill-opacity: 0.35 !important;
+    stroke-opacity: 1 !important;
+    stroke-width: 3px !important;
+    filter: drop-shadow(0 0 12px rgba(255, 56, 56, 0.4));
+    transition: fill-opacity 0.3s ease, stroke-opacity 0.3s ease !important;
+}
+
+.risk-circle-focus-recover {
+    fill-opacity: 0.15 !important;
+    stroke-opacity: 0.6 !important;
+    stroke-width: 2px !important;
+    filter: none;
+    transition: fill-opacity 1s ease, stroke-opacity 1s ease, filter 1s ease !important;
+}
+
+/* ==================== 滚动条 ==================== */
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 212, 255, 0.15);
+    border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 212, 255, 0.3);
+}
+
+/* ==================== 响应式适配 ==================== */
+@media (max-width: 1600px) {
+    .left-area { width: 250px; }
+    .right-area { width: 250px; }
+    .header-title { font-size: 1.45rem; letter-spacing: 6px; }
+    .stat-card-value { font-size: 1.1rem; }
+    .stat-card { padding: 10px 6px; }
+}
+
+@media (max-width: 1366px) {
+    .left-area { width: 220px; }
+    .right-area { width: 220px; }
+    .header-title { font-size: 1.2rem; letter-spacing: 4px; }
+    .large-header { height: 65px; padding: 0 20px; }
+    .header-info-item { min-width: 80px; padding: 4px 10px; }
+    .stat-card-value { font-size: 0.95rem; }
+    .stat-card { padding: 8px 4px; }
+    .stat-card-icon { width: 30px; height: 30px; font-size: 0.8rem; }
+    .stat-card-label { font-size: 0.55rem; }
+}

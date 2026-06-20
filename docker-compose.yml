@@ -1,0 +1,36 @@
+# ==================== 秦岭火情监测系统 - Docker Compose编排文件 ====================
+# 轻量工程化展示：证明项目具备容器化部署能力
+# 比赛现场仍使用 start.bat / stop.bat 启动
+# 一键启动：docker-compose up
+# 停止服务：docker-compose down
+
+version: "3.8"
+
+services:
+  # ==================== 后端API服务 ====================
+  # FastAPI后端服务，提供火灾检测API、传感器数据、告警系统等
+  backend:
+    build:
+      context: .                          # 构建上下文为项目根目录
+      dockerfile: Dockerfile              # 使用项目根目录的Dockerfile
+    container_name: qinling-fire-backend  # 容器名称，便于识别
+    ports:
+      - "8001:8001"                       # 映射8001端口（与本地运行一致）
+    volumes:
+      # 数据库文件持久化（容器重启后数据不丢失）
+      - ./后端服务模块/fire_alarm.db:/app/后端服务模块/fire_alarm.db
+      # 日志目录持久化（容器重启后日志保留）
+      - ./logs:/app/logs
+      # 模型文件挂载（只读，避免镜像体积过大）
+      - ./数据与模型:/app/数据与模型:ro
+    environment:
+      - PYTHONUNBUFFERED=1                # 禁止Python输出缓冲（实时日志）
+      - TZ=Asia/Shanghai                  # 设置时区为上海
+    restart: unless-stopped               # 除非手动停止，否则自动重启
+    healthcheck:
+      # 健康检查：定期检测后端服务是否正常
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 30s                       # 检查间隔：30秒
+      timeout: 10s                        # 超时时间：10秒
+      retries: 3                          # 重试次数：3次
+      start_period: 30s                   # 启动等待时间：30秒

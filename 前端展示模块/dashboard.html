@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 秦岭火情监测系统</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const API_CONFIG = {
+            BASE_URL: 'http://localhost:8001',
+            ENDPOINTS: {
+                DETECT: '/api/detect',
+                SENSOR_DATA: '/api/sensor-data',
+                RISK_ASSESS: '/api/risk-assess'
+            }
+        };
+    </script>
+</head>
+<body>
+    <!-- 告警横幅 -->
+    <div id="alert-banner" class="alert-banner" style="display:none;">
+        <div class="alert-banner-content">
+            <span class="alert-banner-icon">🚨</span>
+            <span class="alert-banner-text" id="alert-banner-text">紧急告警！已向消防部门发送通知（模拟）。</span>
+            <button class="alert-banner-close" id="alert-banner-close" title="关闭告警">&times;</button>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- ===== 顶部状态栏（精简版） ===== -->
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <i class="fas fa-mountain-fire top-bar-icon"></i>
+                <div style="display:flex;flex-direction:column;gap:0;">
+                    <h1 class="top-bar-title">秦岭火情监测系统</h1>
+                    <span class="top-bar-subtitle">QINLING FIRE INTELLIGENT MONITORING</span>
+                </div>
+            </div>
+            <div class="top-bar-center">
+                <div class="top-bar-item">
+                    <i class="fas fa-clock"></i>
+                    <span id="current-time">--:--:--</span>
+                </div>
+                <div class="top-bar-item" id="server-status">
+                    <span class="status-dot" id="server-dot"></span>
+                    <span id="server-text">连接中...</span>
+                </div>
+                <div class="top-bar-item sensor-compact" id="sensor-status-area"></div>
+            </div>
+            <div class="top-bar-right">
+                <select id="model-selector" class="model-selector-compact">
+                    <option value="api" selected>🔥 后端AI模型</option>
+                </select>
+                <a href="/dashboard-large" class="btn-command-screen" title="进入指挥大屏">
+                    <i class="fas fa-tv"></i> 指挥大屏
+                </a>
+            </div>
+        </header>
+
+        <!-- ===== 主内容：左右双栏 ===== -->
+        <main class="main-grid">
+            <!-- 左侧：操作区 -->
+            <section class="panel-left">
+                <!-- 操作按钮组 -->
+                <div class="action-bar">
+                    <button class="btn btn-primary" id="upload-btn">
+                        <i class="fas fa-upload"></i> 上传图片
+                    </button>
+                    <button class="btn btn-success" id="detect-btn">
+                        <i class="fas fa-bolt"></i> 立即检测
+                    </button>
+                    <button class="btn btn-secondary" id="clear-btn">
+                        <i class="fas fa-redo"></i> 重置
+                    </button>
+                    <button class="btn btn-secondary" id="alert-history-btn">
+                        <i class="fas fa-history"></i> 告警历史
+                    </button>
+                    <a href="/evaluation" class="btn btn-secondary" id="evaluation-btn" title="模型评估">
+                        <i class="fas fa-chart-bar"></i> 模型评估
+                    </a>
+                    <button class="btn btn-danger" id="manual-alert-btn" style="display:none;">
+                        <i class="fas fa-bell"></i> 手动告警
+                    </button>
+                </div>
+
+                <!-- 图片预览区 -->
+                <div class="image-card">
+                    <div class="image-container" id="image-container">
+                        <div class="image-placeholder" id="image-placeholder">
+                            <i class="fas fa-image fa-3x"></i>
+                            <p>拖放图片或点击上传</p>
+                            <small>支持 JPG / PNG 格式</small>
+                        </div>
+                        <img id="displayed-image" class="hidden" alt="检测图片">
+                        <div class="image-overlay" id="detection-overlay"></div>
+                    </div>
+                    <input type="file" id="file-input" accept="image/*" hidden>
+                    <div class="detection-controls">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="auto-detect" checked> 上传即检测
+                        </label>
+                        <span class="inference-badge" id="inference-time-badge">
+                            <i class="fas fa-bolt"></i> <span id="inference-time">-- ms</span>
+                        </span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 右侧：结果区 -->
+            <section class="panel-right">
+                <!-- 智能分析结果 -->
+                <div class="result-card modern-card">
+                    <h3><i class="fas fa-brain"></i> AI智能分析</h3>
+                    <div class="result-main-grid">
+                        <div class="result-block">
+                            <label>检测类别</label>
+                            <div id="detection-class" class="result-value-lg">--</div>
+                        </div>
+                        <div class="result-block">
+                            <label>风险等级</label>
+                            <div id="risk-level" class="risk-badge risk-low">--</div>
+                        </div>
+                        <div class="result-block full-width">
+                            <label>置信度</label>
+                            <div class="confidence-meter">
+                                <div class="meter-bar">
+                                    <div class="meter-fill" id="confidence-bar" style="width: 0%"></div>
+                                </div>
+                                <span id="confidence-value" class="confidence-num">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 模型性能 -->
+                <div class="perf-card modern-card">
+                    <h3><i class="fas fa-tachometer-alt"></i> 模型性能</h3>
+                    <div class="perf-grid">
+                        <div class="perf-item">
+                            <div class="perf-icon"><i class="fas fa-database"></i></div>
+                            <div class="perf-info">
+                                <span class="perf-label">模型大小</span>
+                                <span class="perf-value" id="model-size">0.37 MB</span>
+                            </div>
+                        </div>
+                        <div class="perf-item">
+                            <div class="perf-icon"><i class="fas fa-bolt"></i></div>
+                            <div class="perf-info">
+                                <span class="perf-label">推理速度</span>
+                                <span class="perf-value" id="avg-speed">-- ms</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 类别概率分布 -->
+                <div class="prob-card modern-card">
+                    <h3><i class="fas fa-chart-pie"></i> 概率分布</h3>
+                    <div class="prob-chart-wrap">
+                        <canvas id="probability-chart"></canvas>
+                    </div>
+                    <div class="probability-list" id="probability-list"></div>
+                </div>
+            </section>
+        </main>
+
+        <!-- ===== 底部：风险趋势 ===== -->
+        <section class="bottom-chart">
+            <div class="chart-card modern-card">
+                <div class="chart-header">
+                    <h3><i class="fas fa-chart-line"></i> 风险趋势分析</h3>
+                    <select id="chart-range" class="chart-range-select">
+                        <option value="10">最近10次</option>
+                        <option value="20" selected>最近20次</option>
+                        <option value="50">最近50次</option>
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="risk-trend-chart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- 底部状态栏 -->
+        <footer class="status-bar-compact">
+            <span><i class="fas fa-server"></i> 模型: <span id="tf-status" class="status-badge status-success">就绪</span></span>
+            <span><i class="fas fa-sync-alt"></i> 更新: <span id="last-update">--</span></span>
+            <span><i class="fas fa-user"></i> 操作员: 古时月常明</span>
+        </footer>
+    </div>
+
+    <!-- 【D2修复】已彻底删除右上角浮动告警弹窗，仅保留顶部横幅通知 -->
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
